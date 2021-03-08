@@ -1,6 +1,10 @@
 #include <iostream>
 #include "main.hpp"
 
+
+int j = 0;
+constexpr int i = 42;				// type of i is const int
+
 int main()
 {
 //#define _REFERENCE_
@@ -96,7 +100,8 @@ int main()
 #ifdef _CONSTEXPR_AND_CONSTANT_EXPRESSION_
 	/*
 	 * 1. constant expressions is an expression whose value can't be changed and that can be
-	 * evaluated at compile time. e.g. literal, const object that is initilized from a constant expression
+	 * evaluated at compile time. e.g. literal, const object that is initilized from a
+	 * constant expression.
 	 */
 	const int max_files = 20;			// max_file is a constant expression
 	const int limit = max_files + 1;	// limit is a constant expression
@@ -105,7 +110,46 @@ int main()
 	const int sz = get_size();			// const object initiliazed with non-constant expression
 										// is not constant expression, it can be evaluated until runtime
 
+	/*
+	 * In a large system, it can be difficult to determine that an initializer is a constnat expression
+	 * This leads to cases, where we believe we initiliaze a constant expression but actually not
+	 * Under C++ 11 standard, we can ask copmiler to verify that a variable is a constant exrpession
+	 */
+
+	constexpr int mf = 20;				// 20 is a constant expression
+	constexpr int limit = mf + 1;		// mf + 1 is a constant expression
+	//constexpr int sz = get_size();	// error, ok only if get_size() is a constexpr function
+
+	/*
+	 * 1. Under new standard we can define simple functions as constexpr, they should be simple enough
+	 * that the compiler can evaluate at compile time
+	 * 2. Types that can be used when declaring a constexpr are limited to literal types
+	 * 3. Pointers and reference can be defined as constexpr but we have to initialize them strictly
+	 *	  we can initialize constexpr pointer from nullptr literal or the literal 0. we can also point
+	 *    to or bind to an object that remains at a fixed address
+	 */
+
+	const int *p = nullptr;				// p is a pointer to a const int low-level const
+	constexpr int *q = nullptr;			// q is a const pointer to int, top-level const, not
+										// necessarily to be low-level const
+										// constexpr imposes top-level const on the objects it defines
+
+	constexpr int *np = nullptr;		// np is a constant pointer to int that is null (top-level)
+
+
+	/*
+	 * i and j must be defineed outside any function (also main function)
+	 * int j = 0;
+	 * constexpr int i = 42;			// type of i is const int
+	 */
+
+	constexpr const int *pi = &i;		// pi is a constant pointer point to a const int  
+	constexpr int *pj = &j;				// pj is a constant pointer point to a non-const int
+	*pj = 1;							// ok
+	// *pi = 2;							// error
+
 #endif // _CONSTEXPR_AND_CONSTANT_EXPRESSION_
 
 
 }
+
